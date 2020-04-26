@@ -16,7 +16,17 @@ test_matrix = np.array(
      [2, 0, 2, 0, 2, 0, 0, 0]],
     dtype=int
 )
-print(test_matrix.shape)
+test_matrix2 = np.array(
+    [[0, 2, 0, 2, 0, 2, 0, 2],
+     [0, 2, 0, 2, 0, 2, 0, 2],
+     [0, 2, 0, 2, 0, 2, 0, 2],
+     [0, 2, 0, 2, 0, 2, 0, 2],
+     [0, 2, 0, 2, 0, 2, 0, 2],
+     [0, 2, 0, 2, 0, 2, 0, 2],
+     [0, 2, 0, 2, 0, 2, 0, 2],
+     [0, 2, 0, 2, 0, 2, 0, 2], ],
+    dtype=int
+)
 
 
 class AppWindow(QWidget):
@@ -41,6 +51,7 @@ class AppWindow(QWidget):
                         square = QSvgWidget('assets/light_square.svg')
                     self.grid_layout.addWidget(square, x, y)
         else:
+            self.__clear_grid_layout()
             for x in range(8):
                 for y in range(8):
                     if (x * 7 + y) % 2:
@@ -60,6 +71,12 @@ class AppWindow(QWidget):
 
                     self.grid_layout.addWidget(square, x, y)
 
+    def __clear_grid_layout(self):
+        for i in reversed(range(self.grid_layout.count())):
+            widget_to_remove = self.grid_layout.itemAt(i).widget()
+            self.grid_layout.removeWidget(widget_to_remove)
+            widget_to_remove.deleteLater()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -67,5 +84,6 @@ if __name__ == '__main__':
 
     app_window = AppWindow()
     app_window.show()
+    # app_window.draw_checkerboard(test_matrix2)
 
     sys.exit(app.exec_())
