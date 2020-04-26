@@ -39,7 +39,7 @@ class AppWindow(QWidget):
         self.grid_layout.setSpacing(0)
         # self.grid_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.grid_layout)
-        self.draw_checkerboard(board_matrix=test_matrix)
+        self.draw_checkerboard()
 
     def draw_checkerboard(self, board_matrix=None):
         if board_matrix is None:
@@ -84,6 +84,7 @@ if __name__ == '__main__':
 
     app_window = AppWindow()
     app_window.show()
-    # app_window.draw_checkerboard(test_matrix2)
+    app_window.draw_checkerboard(test_matrix2)
+    app_window.draw_checkerboard(test_matrix)
 
     sys.exit(app.exec_())
