@@ -4,7 +4,7 @@ import numpy as np
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton
 
 test_matrix = np.array(
     [[0, 0, 1, 1, 0, 0, 0, 0],
@@ -49,14 +49,25 @@ class AppWindow(QWidget):
         self.thread.start()
 
         # Init UI
+        self.__init_ui()
+
+        self.draw_checkerboard()
+
+    def __init_ui(self):
         self.setWindowIcon(QIcon('assets/app_icon.png'))
         self.setMinimumSize(640, 640)
 
+        self.button = QPushButton('Update the board')
+        # self.button.clicked.connect()
+
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(0)
-        # self.grid_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.grid_layout)
-        self.draw_checkerboard()
+
+        self.v_box_layout = QVBoxLayout()
+        self.v_box_layout.addWidget(self.button)
+        self.v_box_layout.addLayout(self.grid_layout)
+        # self.v_box_layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.v_box_layout)
 
     def draw_checkerboard(self, board_matrix=None):
         self.__clear_grid_layout()
@@ -85,7 +96,6 @@ class AppWindow(QWidget):
                             square = QSvgWidget('assets/light_square_white_checker.svg')
                         else:
                             square = QSvgWidget('assets/light_square.svg')
-
                     self.grid_layout.addWidget(square, x, y)
 
     def __clear_grid_layout(self):
