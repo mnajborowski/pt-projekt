@@ -2,74 +2,96 @@ import sys
 
 import cv2
 import numpy as np
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QIcon, QImage, QPixmap
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QLabel, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
 from checkers.image.board import create_board_matrix
 
-test_matrix = np.array(
-    [[0, 0, 1, 1, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 2, 0],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [0, 0, 0, 0, 0, 0, 1, 0],
-     [0, 0, 0, 2, 0, 0, 0, 0],
-     [0, 0, 0, 0, 2, 0, 0, 0],
-     [0, 1, 0, 0, 0, 0, 0, 2],
-     [2, 0, 2, 0, 2, 0, 0, 0]],
-    dtype=int
-)
-test_matrix2 = np.array(
-    [[0, 2, 0, 2, 0, 2, 0, 2],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [0, 2, 0, 2, 0, 2, 0, 2]],
-    dtype=int
-)
+
+# test_matrix = np.array(
+#     [[0, 0, 1, 1, 0, 0, 0, 0],
+#      [0, 0, 0, 0, 0, 0, 2, 0],
+#      [0, 2, 0, 2, 0, 2, 0, 2],
+#      [0, 0, 0, 0, 0, 0, 1, 0],
+#      [0, 0, 0, 2, 0, 0, 0, 0],
+#      [0, 0, 0, 0, 2, 0, 0, 0],
+#      [0, 1, 0, 0, 0, 0, 0, 2],
+#      [2, 0, 2, 0, 2, 0, 0, 0]],
+#     dtype=int
+# )
+# test_matrix2 = np.array(
+#     [[0, 2, 0, 2, 0, 2, 0, 2],
+#      [0, 2, 0, 2, 0, 2, 0, 2],
+#      [0, 2, 0, 2, 0, 2, 0, 2],
+#      [0, 2, 0, 2, 0, 2, 0, 2],
+#      [0, 2, 0, 2, 0, 2, 0, 2],
+#      [0, 2, 0, 2, 0, 2, 0, 2],
+#      [0, 2, 0, 2, 0, 2, 0, 2],
+#      [0, 2, 0, 2, 0, 2, 0, 2]],
+#     dtype=int
+# )
 
 
-class WorkerThread(QThread):
-    new_board_ready = pyqtSignal(np.ndarray)
-    new_image_ready = pyqtSignal(QImage)
+class Worker(QObject):
+    new_board_ready_signal = pyqtSignal(np.ndarray)
+    new_image_ready_signal = pyqtSignal(QImage)
 
-    def run(self):
+    def __init__(self, parent=None):
+        QObject.__init__(self, parent=parent)
+        self.should_emit = False
+
+    @pyqtSlot()
+    def capture_video(self):
         cap = cv2.VideoCapture(0)
         while True:
-            ret, q_image = cap.read()
-            if ret:
-                rgb_image = cv2.cvtColor(q_image, cv2.COLOR_BGR2RGB)
-                h, w, ch = rgb_image.shape
-                bytes_per_line = ch * w
-                q_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
-                q_image = q_image.scaled(640, 480, Qt.KeepAspectRatio)
-                self.new_image_ready.emit(q_image)
-                self.new_board_ready.emit(create_board_matrix(rgb_image))
+            ret, image = cap.read()
+            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            h, w, ch = rgb_image.shape
+            bytes_per_line = ch * w
+            q_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            q_image = q_image.scaled(640, 480, Qt.KeepAspectRatio)
+            self.new_image_ready_signal.emit(q_image)
+            if self.should_emit:
+                print('Click!')
+                board = create_board_matrix(image)
+                self.emit_new_board(board)
+                self.should_emit = False
+
+    @pyqtSlot(np.ndarray)
+    def emit_new_board(self, board):
+        self.new_board_ready_signal.emit(board)
+
+    # @pyqtSlot()
+    def set_should_emit(self):
+        self.should_emit = True
 
 
 class AppWindow(QWidget):
+    should_emit_signal = pyqtSignal()
+
     def __init__(self):
         super().__init__()
-        self.thread = WorkerThread()
-        self.thread.new_image_ready.connect(self.set_camera_image)
-        self.thread.new_board_ready.connect(self.draw_checkerboard)
+        # Create Worker and Thread
+        self.worker = Worker()
+        self.should_emit_signal.connect(self.worker.set_should_emit)
+        self.thread = QThread()
+        self.thread.started.connect(self.worker.capture_video)
+        self.worker.new_image_ready_signal.connect(self.set_camera_image)
+        self.worker.new_board_ready_signal.connect(self.draw_checkerboard)
+        self.worker.moveToThread(self.thread)
+        self.thread.start()
 
         # Init UI
         self.__init_ui()
-        self.draw_checkerboard()
-
-        self.thread.start()
 
     def __init_ui(self):
         self.setWindowIcon(QIcon('assets/app_icon.png'))
         # self.setMinimumSize(640, 640)
 
-        # self.button = QPushButton('Update the board')
-        # self.button.clicked.connect(self.thread.button_clicked)
+        self.button = QPushButton('Update the board')
+        self.button.clicked.connect(self.update_checkerboard)
 
         self.image_label = QLabel()
 
@@ -80,7 +102,7 @@ class AppWindow(QWidget):
         self.grid_layout.setSpacing(0)
 
         self.v_box_layout = QVBoxLayout()
-        # self.v_box_layout.addWidget(self.button)
+        self.v_box_layout.addWidget(self.button)
         self.v_box_layout.addLayout(self.grid_layout)
         # self.v_box_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -89,9 +111,15 @@ class AppWindow(QWidget):
         self.h_box_layout.addLayout(self.v_box_layout)
         self.setLayout(self.h_box_layout)
 
+        self.draw_checkerboard()
+
     @pyqtSlot(QImage)
     def set_camera_image(self, img):
         self.image_label.setPixmap(QPixmap.fromImage(img))
+
+    @pyqtSlot()
+    def update_checkerboard(self):
+        self.should_emit_signal.emit()
 
     @pyqtSlot(np.ndarray)
     def draw_checkerboard(self, board_matrix=None):
