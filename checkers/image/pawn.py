@@ -7,7 +7,7 @@ def search_for_pawn(img):
     edges = cv2.Canny(gray, 50, 150)
     circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT, 1, 20,
                                param1=75,
-                               param2=16,
+                               param2=17,
                                minRadius=18)
     if circles is None:
         return False
