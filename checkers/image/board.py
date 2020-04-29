@@ -9,38 +9,31 @@ from checkers.image.pawncolours import PawnColour
 
 def detect_board(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_resized = cv2.resize(img, (0, 0), fx=0.2, fy=0.2)
-    img_gray_resized = cv2.resize(img_gray, (0, 0), fx=0.2, fy=0.2)
+    img_resized = cv2.resize(img, (0, 0), fx=0.6, fy=0.6)
+    img_gray_resized = cv2.resize(img_gray, (0, 0), fx=0.6, fy=0.6)
     ret, thresh = cv2.threshold(img_gray_resized, 90, 255, cv2.THRESH_BINARY)
     kernel = np.ones((7, 7), np.uint8)
     erosion = cv2.erode(thresh, kernel, iterations=1)
     contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    board = cut_the_board(img_resized, contours)
-    board_matrix = create_board_matrix(board)
-    print(board_matrix)
-
-    cv2.imshow("board", board)
-    # cv2.imshow('thresh', thresh)
-    # cv2.imshow('erosion', erosion)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    return cut_the_board(img_resized, contours)
 
 
 def cut_the_board(img, contours):
-    filtered_contours = [contour for contour in contours if 2000 < cv2.contourArea(contour) < 3300]
+    filtered_contours = [contour for contour in contours if 1700 < cv2.contourArea(contour) < 3500]
     flat_list_x = []
     flat_list_y = []
     for sublist in filtered_contours:
         for item in sublist:
             flat_list_x.append(item[0][0])
             flat_list_y.append(item[0][1])
-    minx = min(flat_list_x)
-    maxx = max(flat_list_x)
-    miny = min(flat_list_y)
-    maxy = max(flat_list_y)
-
-    return img[miny:maxy, minx:maxx]
+    if len(flat_list_x) != 0 and len(flat_list_y) != 0:
+        minx = min(flat_list_x)
+        maxx = max(flat_list_x)
+        miny = min(flat_list_y)
+        maxy = max(flat_list_y)
+        return img[miny:maxy, minx:maxx]
+    print("Cannot detect the board! (TUBUDUBU)")
 
 
 def get_square(img, row, col):
@@ -57,10 +50,10 @@ def detect_pawn_colour(square):
 
     number_of_pixels = square.shape[0] * square.shape[1]
     hist = cv2.calcHist([gray], [0], None, [256], [0, 100])
-    if (np.sum(hist) / number_of_pixels) > 0.7:
+    if (np.sum(hist) / number_of_pixels) > 0.6:
         return PawnColour.BLACK
     hist = cv2.calcHist([gray], [0], None, [256], [101, 256])
-    if (np.sum(hist) / number_of_pixels) > 0.65:
+    if (np.sum(hist) / number_of_pixels) > 0.6:
         return PawnColour.WHITE
     return PawnColour.UNDEFINED
 
