@@ -46,7 +46,6 @@ class Worker(QObject):
     @pyqtSlot()
     def capture_video(self):
         url = 'http://192.168.1.42:8080/shot.jpg'
-        # cap = cv2.VideoCapture(0)
         while True:
             imgResponse = urllib.request.urlopen(url)
             imgNp = np.array(bytearray(imgResponse.read()), dtype=np.uint8)
