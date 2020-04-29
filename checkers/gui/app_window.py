@@ -1,4 +1,5 @@
 import sys
+import urllib.request
 
 import cv2
 import numpy as np
@@ -7,7 +8,7 @@ from PyQt5.QtGui import QIcon, QImage, QPixmap
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
-from checkers.image.board import create_board_matrix, cut_the_board, detect_board
+from checkers.image.board import create_board_matrix, detect_board
 
 
 # test_matrix = np.array(
@@ -44,9 +45,12 @@ class Worker(QObject):
 
     @pyqtSlot()
     def capture_video(self):
-        cap = cv2.VideoCapture(0)
+        url = 'http://192.168.1.42:8080/shot.jpg'
+        # cap = cv2.VideoCapture(0)
         while True:
-            ret, image = cap.read()
+            imgResponse = urllib.request.urlopen(url)
+            imgNp = np.array(bytearray(imgResponse.read()), dtype=np.uint8)
+            image = cv2.imdecode(imgNp, -1)
             rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             h, w, ch = rgb_image.shape
             bytes_per_line = ch * w
@@ -56,8 +60,9 @@ class Worker(QObject):
             if self.should_emit:
                 print('Click!')
                 board = detect_board(image)
-                matrix = create_board_matrix(board)
-                self.emit_new_board(matrix)
+                if board is not None:
+                    matrix = create_board_matrix(board)
+                    self.emit_new_board(matrix)
                 self.should_emit = False
 
     @pyqtSlot(np.ndarray)

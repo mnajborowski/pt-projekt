@@ -27,12 +27,13 @@ def cut_the_board(img, contours):
         for item in sublist:
             flat_list_x.append(item[0][0])
             flat_list_y.append(item[0][1])
-    minx = min(flat_list_x)
-    maxx = max(flat_list_x)
-    miny = min(flat_list_y)
-    maxy = max(flat_list_y)
-
-    return img[miny:maxy, minx:maxx]
+    if len(flat_list_x) != 0 and len(flat_list_y) != 0:
+        minx = min(flat_list_x)
+        maxx = max(flat_list_x)
+        miny = min(flat_list_y)
+        maxy = max(flat_list_y)
+        return img[miny:maxy, minx:maxx]
+    print("Cannot detect the board! (TUBUDUBU)")
 
 
 def get_square(img, row, col):
@@ -66,13 +67,3 @@ def create_board_matrix(img):
                 colour = detect_pawn_colour(square)
                 board_matrix[i][j] = colour.value
     return board_matrix
-
-
-def read_camera():
-    url = 'http://192.168.1.39:8080/shot.jpg'
-    while True:
-        imgResponse = urllib.request.urlopen(url)
-        imgNp = np.array(bytearray(imgResponse.read()), dtype=np.uint8)
-        img = cv2.imdecode(imgNp, -1)
-        detect_board(img)
-        cv2.waitKey(0)
