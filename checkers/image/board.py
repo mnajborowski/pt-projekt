@@ -20,9 +20,7 @@ def detect_board(img):
 
 
 def cut_the_board(img, contours):
-    for contour in contours:
-        print(cv2.contourArea(contour))
-    filtered_contours = [contour for contour in contours if 1700 < cv2.contourArea(contour) < 3600]
+    filtered_contours = [contour for contour in contours if 1700 < cv2.contourArea(contour) < 3500]
     flat_list_x = []
     flat_list_y = []
     for sublist in filtered_contours:
@@ -78,7 +76,3 @@ def read_camera():
         img = cv2.imdecode(imgNp, -1)
         detect_board(img)
         cv2.waitKey(0)
-
-
-if __name__ == '__main__':
-    read_camera()
