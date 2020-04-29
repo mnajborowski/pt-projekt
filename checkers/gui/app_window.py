@@ -47,9 +47,9 @@ class Worker(QObject):
     def capture_video(self):
         url = 'http://192.168.1.42:8080/shot.jpg'
         while True:
-            imgResponse = urllib.request.urlopen(url)
-            imgNp = np.array(bytearray(imgResponse.read()), dtype=np.uint8)
-            image = cv2.imdecode(imgNp, -1)
+            img_response = urllib.request.urlopen(url)
+            img_np = np.array(bytearray(img_response.read()), dtype=np.uint8)
+            image = cv2.imdecode(img_np, -1)
             rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             h, w, ch = rgb_image.shape
             bytes_per_line = ch * w
