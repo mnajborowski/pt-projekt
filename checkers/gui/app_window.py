@@ -11,30 +11,6 @@ from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPu
 from checkers.image.board import create_board_matrix, detect_board
 
 
-# test_matrix = np.array(
-#     [[0, 0, 1, 1, 0, 0, 0, 0],
-#      [0, 0, 0, 0, 0, 0, 2, 0],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 0, 0, 0, 0, 0, 1, 0],
-#      [0, 0, 0, 2, 0, 0, 0, 0],
-#      [0, 0, 0, 0, 2, 0, 0, 0],
-#      [0, 1, 0, 0, 0, 0, 0, 2],
-#      [2, 0, 2, 0, 2, 0, 0, 0]],
-#     dtype=int
-# )
-# test_matrix2 = np.array(
-#     [[0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2]],
-#     dtype=int
-# )
-
-
 class Worker(QObject):
     new_board_ready_signal = pyqtSignal(np.ndarray)
     new_image_ready_signal = pyqtSignal(QImage)
@@ -45,6 +21,13 @@ class Worker(QObject):
 
     @pyqtSlot()
     def capture_video(self):
+        # image = cv2.imread('assets/IMG_20200425_181417.jpg')
+        # rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # h, w, ch = rgb_image.shape
+        # bytes_per_line = ch * w
+        # q_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        # q_image = q_image.scaled(640, 480, Qt.KeepAspectRatio)
+        # self.new_image_ready_signal.emit(q_image)
         url = 'http://192.168.1.43:8080/shot.jpg'
         while True:
             img_response = urllib.request.urlopen(url)
