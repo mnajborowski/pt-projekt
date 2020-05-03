@@ -1,7 +1,7 @@
-import urllib.request
-
 import cv2
 import numpy as np
+from skimage.exposure import rescale_intensity
+from skimage.filters import threshold_yen
 
 from checkers.image.pawn import search_for_pawn
 from checkers.image.pawncolours import PawnColour
@@ -60,10 +60,14 @@ def detect_pawn_colour(square):
 
 def create_board_matrix(img):
     board_matrix = np.zeros([8, 8], dtype=int)
+    yen_threshold = threshold_yen(img)
+    bright = rescale_intensity(img, (0, yen_threshold), (0, 255))
+    without_noise = cv2.fastNlMeansDenoisingColored(bright, None, 5, 5, 7, 21)
     for i in range(8):
         for j in range(8):
             square = get_square(img, i, j)
-            if search_for_pawn(square):
+            bright_square = get_square(without_noise, i, j)
+            if search_for_pawn(square, bright_square):
                 colour = detect_pawn_colour(square)
                 board_matrix[i][j] = colour.value
     return board_matrix
