@@ -6,10 +6,10 @@ from checkers.logic.move_status import MoveStatus
 before_matrix = np.array(
     [[0, 1, 0, 1, 0, 1, 0, 1],
      [1, 0, 1, 0, 1, 0, 1, 0],
-     [0, 0, 0, 1, 0, 1, 0, 1],
+     [0, 0, 0, 0, 0, 0, 0, 1],
+     [1, 0, 0, 0, 0, 0, 0, 0],
      [0, 0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 1, 0, 0, 0, 0],
-     [2, 0, 0, 0, 2, 0, 2, 0],
+     [0, 0, 2, 0, 2, 0, 2, 0],
      [0, 2, 0, 2, 0, 2, 0, 2],
      [2, 0, 2, 0, 2, 0, 2, 0]],
     dtype=int
@@ -18,10 +18,10 @@ before_matrix = np.array(
 after_matrix = np.array(
     [[0, 1, 0, 1, 0, 1, 0, 1],
      [1, 0, 1, 0, 1, 0, 1, 0],
-     [0, 0, 0, 1, 0, 1, 0, 1],
-     [0, 0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 1, 0, 0, 0, 0],
-     [2, 0, 0, 0, 2, 0, 2, 0],
+     [0, 0, 0, 0, 0, 0, 0, 1],
+     [1, 0, 0, 0, 0, 0, 0, 0],
+     [0, 0, 0, 0, 0, 0, 0, 2],
+     [0, 0, 2, 0, 2, 0, 0, 0],
      [0, 2, 0, 2, 0, 2, 0, 2],
      [2, 0, 2, 0, 2, 0, 2, 0]],
     dtype=int
@@ -87,7 +87,7 @@ def get_correct_next_positions(x, y, opponent_color):
 
 
 def is_on_board(x, y):
-    return x in range(0, 7) and y in range(0, 7)
+    return x in range(8) and y in range(8)
 
 
 def is_opponent(x, y, opponent_color):
@@ -106,4 +106,4 @@ def moved_correctly(new_positions, correct_positions):
 
 
 if __name__ == '__main__':
-    print(check_move(before_matrix, after_matrix, PawnColour.BLACK))
+    print(check_move(before_matrix, after_matrix, PawnColour.WHITE))
