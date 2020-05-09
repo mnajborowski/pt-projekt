@@ -6,3 +6,10 @@ class PawnColour(Enum):
     BLACK = 1
     WHITE = 2
     UNDEFINED = 3
+
+
+def opposite(color):
+    if color == PawnColour.BLACK:
+        return PawnColour.WHITE
+    else:
+        return PawnColour.BLACK
