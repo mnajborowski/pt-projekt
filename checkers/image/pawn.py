@@ -11,7 +11,7 @@ def search_for_pawn(img, bright):
                                minRadius=18)
     circles_bright = cv2.HoughCircles(gray_bright, cv2.HOUGH_GRADIENT, 1, 20,
                                       param1=75,
-                                      param2=20,
+                                      param2=17,
                                       minRadius=18)
     if circles is None and circles_bright is None:
         return False

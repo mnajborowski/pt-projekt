@@ -9,6 +9,12 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
 from checkers.image.board import create_board_matrix, detect_board
+from checkers.image.pawncolours import PawnColour
+from checkers.logic.move import check_move
+
+before_matrix = None
+after_matrix = None
+move = PawnColour.WHITE
 
 
 # test_matrix = np.array(
@@ -45,7 +51,10 @@ class Worker(QObject):
 
     @pyqtSlot()
     def capture_video(self):
-        url = 'http://192.168.1.43:8080/shot.jpg'
+        global before_matrix
+        global after_matrix
+        global move
+        url = 'http://192.168.1.51:8080/shot.jpg'
         while True:
             img_response = urllib.request.urlopen(url)
             img_np = np.array(bytearray(img_response.read()), dtype=np.uint8)
@@ -58,10 +67,19 @@ class Worker(QObject):
             self.new_image_ready_signal.emit(q_image)
             if self.should_emit:
                 print('Click!')
+                before_matrix = after_matrix
                 board = detect_board(image)
                 if board is not None:
-                    matrix = create_board_matrix(board)
-                    self.emit_new_board(matrix)
+                    after_matrix = create_board_matrix(board)
+                    self.emit_new_board(after_matrix)
+                    if before_matrix is not None:
+                        print(before_matrix)
+                        print(after_matrix)
+                        print(check_move(before_matrix, after_matrix, move))
+                        if move is PawnColour.WHITE:
+                            move = PawnColour.BLACK
+                        else:
+                            move = PawnColour.WHITE
                 self.should_emit = False
 
     @pyqtSlot(np.ndarray)
