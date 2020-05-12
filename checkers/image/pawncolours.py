@@ -8,8 +8,8 @@ class PawnColour(Enum):
     UNDEFINED = 3
 
 
-def opposite(color):
-    if color == PawnColour.BLACK:
+def opposite(colour):
+    if colour == PawnColour.BLACK:
         return PawnColour.WHITE
     else:
         return PawnColour.BLACK
