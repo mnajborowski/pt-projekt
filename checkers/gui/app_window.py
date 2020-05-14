@@ -8,7 +8,7 @@ from PyQt5.QtGui import QIcon, QImage, QPixmap
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
-from checkers.image.board import create_board_matrix, detect_board
+from checkers.image.board import detect_board, create_board_matrix
 from checkers.image.pawncolours import PawnColour, opposite
 from checkers.logic.move import check_move
 from checkers.logic.move_status import MoveStatus
@@ -24,7 +24,9 @@ class Worker(QObject):
         self.before_matrix = None
         self.after_matrix = None
         self.player_colour = PawnColour.WHITE
+        self.i = 0
 
+    # With camera
     @pyqtSlot()
     def capture_video(self):
         url = 'http://192.168.1.58:8080/shot.jpg'
@@ -50,6 +52,29 @@ class Worker(QObject):
                         self.emit_new_board(self.after_matrix)
                 self.should_emit = False
 
+    # Without camera
+    # @pyqtSlot()
+    # def capture_video(self):
+    #     while True:
+    #         QThread.usleep(16660)
+    #         if self.should_emit:
+    #             self.before_matrix = self.after_matrix
+    #             if self.i == 0:
+    #                 self.after_matrix = first_matrix
+    #             if self.i == 1:
+    #                 self.after_matrix = second_matrix
+    #             if self.i == 2:
+    #                 self.after_matrix = third_matrix
+    #             self.emit_new_board(self.after_matrix)
+    #
+    #             if self.after_matrix is not None and self.i > 0:
+    #                 print(check_move(self.before_matrix, self.after_matrix, self.player_colour))
+    #                 self.player_colour = opposite(self.player_colour)
+    #                 print(self.player_colour)
+    #
+    #             self.i = self.i + 1
+    #             self.should_emit = False
+
     @pyqtSlot(np.ndarray)
     def emit_new_board(self, board):
         self.new_board_ready_signal.emit(board)
@@ -58,7 +83,7 @@ class Worker(QObject):
     def set_should_emit(self):
         self.should_emit = True
 
-    def make_move(self):
+    def __make_move(self):
         move = check_move(self.before_matrix, self.after_matrix, self.player_colour)
         if move == MoveStatus.CORRECT:
             self.emit_new_board(self.after_matrix)
@@ -77,17 +102,21 @@ class AppWindow(QWidget):
     def __init__(self):
         super().__init__()
         # Create Worker and Thread
+        self.__init_worker_thread()
+
+        # Create UI
+        self.__init_ui()
+
+    def __init_worker_thread(self):
         self.worker = Worker()
         self.should_emit_signal.connect(self.worker.set_should_emit)
         self.thread = QThread()
+        # noinspection PyUnresolvedReferences
         self.thread.started.connect(self.worker.capture_video)
         self.worker.new_image_ready_signal.connect(self.set_camera_image)
         self.worker.new_board_ready_signal.connect(self.draw_checkerboard)
         self.worker.moveToThread(self.thread)
         self.thread.start()
-
-        # Init UI
-        self.__init_ui()
 
     def __init_ui(self):
         self.setWindowIcon(QIcon('assets/app_icon.png'))
@@ -95,6 +124,10 @@ class AppWindow(QWidget):
 
         self.button = QPushButton('Update the board')
         self.button.clicked.connect(self.update_checkerboard)
+
+        self.text_label = QLabel()
+        self.text_label.setText('Label')
+        self.text_label.setAlignment(Qt.AlignCenter)
 
         self.image_label = QLabel()
 
@@ -106,6 +139,7 @@ class AppWindow(QWidget):
 
         self.v_box_layout = QVBoxLayout()
         self.v_box_layout.addWidget(self.button)
+        self.v_box_layout.addWidget(self.text_label)
         self.v_box_layout.addLayout(self.grid_layout)
         # self.v_box_layout.setContentsMargins(0, 0, 0, 0)
 
