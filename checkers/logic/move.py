@@ -1,32 +1,8 @@
 import numpy as np
 
 from checkers.image.pawncolours import PawnColour
-from checkers.logic.move_status import MoveStatus
 from checkers.image.pawncolours import opposite
-
-before_test_matrix = np.array(
-    [[0, 1, 0, 1, 0, 1, 0, 1],
-     [1, 0, 1, 0, 1, 0, 1, 0],
-     [0, 1, 0, 0, 0, 1, 0, 0],
-     [0, 0, 0, 0, 1, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0, 0],
-     [2, 0, 2, 0, 0, 0, 0, 0],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [2, 0, 2, 0, 2, 0, 2, 0]],
-    dtype=int
-)
-
-after_test_matrix = np.array(
-    [[0, 1, 0, 1, 0, 1, 0, 1],
-     [1, 0, 1, 0, 1, 0, 1, 0],
-     [0, 1, 0, 0, 0, 1, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0, 0],
-     [2, 0, 2, 0, 0, 0, 1, 0],
-     [0, 2, 0, 2, 0, 2, 0, 2],
-     [2, 0, 2, 0, 2, 0, 2, 0]],
-    dtype=int
-)
+from checkers.logic.move_status import MoveStatus
 
 
 def check_move(before_matrix, after_matrix, player_colour):
@@ -67,7 +43,7 @@ def check_move(before_matrix, after_matrix, player_colour):
 
 
 def get_old_and_new_positions(before, after, pawn_colour):
-    return np.argwhere(np.logical_and(before == pawn_colour.value, after == 0)),\
+    return np.argwhere(np.logical_and(before == pawn_colour.value, after == 0)), \
            np.argwhere(np.logical_and(before == 0, after == pawn_colour.value))
 
 
@@ -120,4 +96,28 @@ def moved_correctly(new_positions, correct_positions):
 
 
 if __name__ == '__main__':
+    before_test_matrix = np.array(
+        [[0, 1, 0, 1, 0, 1, 0, 1],
+         [1, 0, 1, 0, 1, 0, 1, 0],
+         [0, 1, 0, 0, 0, 1, 0, 0],
+         [0, 0, 0, 0, 1, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [2, 0, 2, 0, 0, 0, 0, 0],
+         [0, 2, 0, 2, 0, 2, 0, 2],
+         [2, 0, 2, 0, 2, 0, 2, 0]],
+        dtype=int
+    )
+
+    after_test_matrix = np.array(
+        [[0, 1, 0, 1, 0, 1, 0, 1],
+         [1, 0, 1, 0, 1, 0, 1, 0],
+         [0, 1, 0, 0, 0, 1, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [2, 0, 2, 0, 0, 0, 1, 0],
+         [0, 2, 0, 2, 0, 2, 0, 2],
+         [2, 0, 2, 0, 2, 0, 2, 0]],
+        dtype=int
+    )
+
     print(check_move(before_test_matrix, after_test_matrix, PawnColour.BLACK))
