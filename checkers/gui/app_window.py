@@ -9,36 +9,9 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
 from checkers.image.board import create_board_matrix, detect_board
-from checkers.image.pawncolours import PawnColour
+from checkers.image.pawncolours import PawnColour, opposite
 from checkers.logic.move import check_move
-
-before_matrix = None
-after_matrix = None
-move = PawnColour.WHITE
-
-
-# test_matrix = np.array(
-#     [[0, 0, 1, 1, 0, 0, 0, 0],
-#      [0, 0, 0, 0, 0, 0, 2, 0],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 0, 0, 0, 0, 0, 1, 0],
-#      [0, 0, 0, 2, 0, 0, 0, 0],
-#      [0, 0, 0, 0, 2, 0, 0, 0],
-#      [0, 1, 0, 0, 0, 0, 0, 2],
-#      [2, 0, 2, 0, 2, 0, 0, 0]],
-#     dtype=int
-# )
-# test_matrix2 = np.array(
-#     [[0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2],
-#      [0, 2, 0, 2, 0, 2, 0, 2]],
-#     dtype=int
-# )
+from checkers.logic.move_status import MoveStatus
 
 
 class Worker(QObject):
@@ -48,13 +21,13 @@ class Worker(QObject):
     def __init__(self, parent=None):
         QObject.__init__(self, parent=parent)
         self.should_emit = False
+        self.before_matrix = None
+        self.after_matrix = None
+        self.player_colour = PawnColour.WHITE
 
     @pyqtSlot()
     def capture_video(self):
-        global before_matrix
-        global after_matrix
-        global move
-        url = 'http://192.168.1.51:8080/shot.jpg'
+        url = 'http://192.168.1.58:8080/shot.jpg'
         while True:
             img_response = urllib.request.urlopen(url)
             img_np = np.array(bytearray(img_response.read()), dtype=np.uint8)
@@ -67,19 +40,14 @@ class Worker(QObject):
             self.new_image_ready_signal.emit(q_image)
             if self.should_emit:
                 print('Click!')
-                before_matrix = after_matrix
+                self.before_matrix = self.after_matrix
                 board = detect_board(image)
                 if board is not None:
-                    after_matrix = create_board_matrix(board)
-                    self.emit_new_board(after_matrix)
-                    if before_matrix is not None:
-                        print(before_matrix)
-                        print(after_matrix)
-                        print(check_move(before_matrix, after_matrix, move))
-                        if move is PawnColour.WHITE:
-                            move = PawnColour.BLACK
-                        else:
-                            move = PawnColour.WHITE
+                    self.after_matrix = create_board_matrix(board)
+                    if self.before_matrix is not None:
+                        self.make_move()
+                    else:
+                        self.emit_new_board(self.after_matrix)
                 self.should_emit = False
 
     @pyqtSlot(np.ndarray)
@@ -89,6 +57,18 @@ class Worker(QObject):
     # @pyqtSlot()
     def set_should_emit(self):
         self.should_emit = True
+
+    def make_move(self):
+        move = check_move(self.before_matrix, self.after_matrix, self.player_colour)
+        if move == MoveStatus.CORRECT:
+            self.emit_new_board(self.after_matrix)
+            self.player_colour = opposite(self.player_colour)
+        elif move == MoveStatus.INCORRECT:
+            # TODO some message
+            self.after_matrix = self.before_matrix
+        elif move == MoveStatus.UNDEFINED:
+            # TODO some message
+            self.after_matrix = self.before_matrix
 
 
 class AppWindow(QWidget):

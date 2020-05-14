@@ -3,8 +3,7 @@ import numpy as np
 from skimage.exposure import rescale_intensity
 from skimage.filters import threshold_yen
 
-from checkers.image.pawn import search_for_pawn
-from checkers.image.pawncolours import PawnColour
+from checkers.image.pawn import search_for_pawn, detect_pawn_colour
 
 
 def detect_board(img):
@@ -17,6 +16,21 @@ def detect_board(img):
     contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     return cut_the_board(img_resized, contours)
+
+
+def create_board_matrix(img):
+    board_matrix = np.zeros([8, 8], dtype=int)
+    yen_threshold = threshold_yen(img)
+    bright = rescale_intensity(img, (0, yen_threshold), (0, 255))
+    without_noise = cv2.fastNlMeansDenoisingColored(bright, None, 5, 5, 7, 21)
+    for i in range(8):
+        for j in range(8):
+            square = get_square(img, i, j)
+            bright_square = get_square(without_noise, i, j)
+            if search_for_pawn(square, bright_square):
+                colour = detect_pawn_colour(square)
+                board_matrix[i][j] = colour.value
+    return board_matrix
 
 
 def cut_the_board(img, contours):
@@ -43,31 +57,3 @@ def get_square(img, row, col):
     x2, y2 = x1 + square, y1 + square
 
     return img[x1:x2, y1:y2]
-
-
-def detect_pawn_colour(square):
-    gray = cv2.cvtColor(square, cv2.COLOR_BGR2GRAY)
-
-    number_of_pixels = square.shape[0] * square.shape[1]
-    hist = cv2.calcHist([gray], [0], None, [256], [0, 100])
-    if (np.sum(hist) / number_of_pixels) > 0.6:
-        return PawnColour.BLACK
-    hist = cv2.calcHist([gray], [0], None, [256], [101, 256])
-    if (np.sum(hist) / number_of_pixels) > 0.6:
-        return PawnColour.WHITE
-    return PawnColour.UNDEFINED
-
-
-def create_board_matrix(img):
-    board_matrix = np.zeros([8, 8], dtype=int)
-    yen_threshold = threshold_yen(img)
-    bright = rescale_intensity(img, (0, yen_threshold), (0, 255))
-    without_noise = cv2.fastNlMeansDenoisingColored(bright, None, 5, 5, 7, 21)
-    for i in range(8):
-        for j in range(8):
-            square = get_square(img, i, j)
-            bright_square = get_square(without_noise, i, j)
-            if search_for_pawn(square, bright_square):
-                colour = detect_pawn_colour(square)
-                board_matrix[i][j] = colour.value
-    return board_matrix
