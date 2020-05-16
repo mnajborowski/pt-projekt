@@ -8,6 +8,7 @@ from PyQt5.QtGui import QIcon, QImage, QPixmap
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
+from checkers.gui.test_matrices import first_matrix, second_matrix, third_matrix
 from checkers.image.board import detect_board, create_board_matrix
 from checkers.image.pawncolours import PawnColour, opposite
 from checkers.logic.move import check_move
@@ -27,53 +28,53 @@ class Worker(QObject):
         self.i = 0
 
     # With camera
-    @pyqtSlot()
-    def capture_video(self):
-        url = 'http://192.168.1.58:8080/shot.jpg'
-        while True:
-            img_response = urllib.request.urlopen(url)
-            img_np = np.array(bytearray(img_response.read()), dtype=np.uint8)
-            image = cv2.imdecode(img_np, -1)
-            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            h, w, ch = rgb_image.shape
-            bytes_per_line = ch * w
-            q_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
-            q_image = q_image.scaled(640, 480, Qt.KeepAspectRatio)
-            self.new_image_ready_signal.emit(q_image)
-            if self.should_emit:
-                print('Click!')
-                self.before_matrix = self.after_matrix
-                board = detect_board(image)
-                if board is not None:
-                    self.after_matrix = create_board_matrix(board)
-                    if self.before_matrix is not None:
-                        self.make_move()
-                    else:
-                        self.emit_new_board(self.after_matrix)
-                self.should_emit = False
-
-    # Without camera
     # @pyqtSlot()
     # def capture_video(self):
+    #     url = 'http://192.168.1.58:8080/shot.jpg'
     #     while True:
-    #         QThread.usleep(16660)
+    #         img_response = urllib.request.urlopen(url)
+    #         img_np = np.array(bytearray(img_response.read()), dtype=np.uint8)
+    #         image = cv2.imdecode(img_np, -1)
+    #         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    #         h, w, ch = rgb_image.shape
+    #         bytes_per_line = ch * w
+    #         q_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+    #         q_image = q_image.scaled(640, 480, Qt.KeepAspectRatio)
+    #         self.new_image_ready_signal.emit(q_image)
     #         if self.should_emit:
+    #             print('Click!')
     #             self.before_matrix = self.after_matrix
-    #             if self.i == 0:
-    #                 self.after_matrix = first_matrix
-    #             if self.i == 1:
-    #                 self.after_matrix = second_matrix
-    #             if self.i == 2:
-    #                 self.after_matrix = third_matrix
-    #             self.emit_new_board(self.after_matrix)
-    #
-    #             if self.after_matrix is not None and self.i > 0:
-    #                 print(check_move(self.before_matrix, self.after_matrix, self.player_colour))
-    #                 self.player_colour = opposite(self.player_colour)
-    #                 print(self.player_colour)
-    #
-    #             self.i = self.i + 1
+    #             board = detect_board(image)
+    #             if board is not None:
+    #                 self.after_matrix = create_board_matrix(board)
+    #                 if self.before_matrix is not None:
+    #                     self.make_move()
+    #                 else:
+    #                     self.emit_new_board(self.after_matrix)
     #             self.should_emit = False
+
+    # Without camera
+    @pyqtSlot()
+    def capture_video(self):
+        while True:
+            QThread.usleep(16660)
+            if self.should_emit:
+                self.before_matrix = self.after_matrix
+                if self.i == 0:
+                    self.after_matrix = first_matrix
+                if self.i == 1:
+                    self.after_matrix = second_matrix
+                if self.i == 2:
+                    self.after_matrix = third_matrix
+                self.emit_new_board(self.after_matrix)
+
+                if self.after_matrix is not None and self.i > 0:
+                    print(check_move(self.before_matrix, self.after_matrix, self.player_colour))
+                    self.player_colour = opposite(self.player_colour)
+                    print(self.player_colour)
+
+                self.i = self.i + 1
+                self.should_emit = False
 
     @pyqtSlot(np.ndarray)
     def emit_new_board(self, board):
