@@ -18,6 +18,7 @@ from checkers.logic.move_status import MoveStatus
 class Worker(QObject):
     new_board_ready_signal = pyqtSignal(np.ndarray)
     new_image_ready_signal = pyqtSignal(QImage)
+    new_label_ready_signal = pyqtSignal(str)
 
     def __init__(self, parent=None):
         QObject.__init__(self, parent=parent)
@@ -26,6 +27,7 @@ class Worker(QObject):
         self.after_matrix = None
         self.player_colour = PawnColour.WHITE
         self.i = 0
+        self.label = ''
 
     # With camera
     # @pyqtSlot()
@@ -70,6 +72,12 @@ class Worker(QObject):
 
                 if self.after_matrix is not None and self.i > 0:
                     print(check_move(self.before_matrix, self.after_matrix, self.player_colour))
+                    if check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.CORRECT:
+                        self.emit_new_label('Correct move')
+                    elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.INCORRECT:
+                        self.emit_new_label('Incorrect move')
+                    elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.UNDEFINED:
+                        self.emit_new_label('Undefined move')
                     self.player_colour = opposite(self.player_colour)
                     print(self.player_colour)
 
@@ -84,16 +92,23 @@ class Worker(QObject):
     def set_should_emit(self):
         self.should_emit = True
 
+    @pyqtSlot(str)
+    def emit_new_label(self, text):
+        self.new_label_ready_signal.emit(text)
+
     def __make_move(self):
         move = check_move(self.before_matrix, self.after_matrix, self.player_colour)
         if move == MoveStatus.CORRECT:
             self.emit_new_board(self.after_matrix)
             self.player_colour = opposite(self.player_colour)
+            self.emit_new_label('Correct move')
         elif move == MoveStatus.INCORRECT:
             # TODO some message
+            self.emit_new_label('Incorrect move')
             self.after_matrix = self.before_matrix
         elif move == MoveStatus.UNDEFINED:
             # TODO some message
+            self.emit_new_label('Undefined move')
             self.after_matrix = self.before_matrix
 
 
@@ -116,6 +131,7 @@ class AppWindow(QWidget):
         self.thread.started.connect(self.worker.capture_video)
         self.worker.new_image_ready_signal.connect(self.set_camera_image)
         self.worker.new_board_ready_signal.connect(self.draw_checkerboard)
+        self.worker.new_label_ready_signal.connect(self.update_label)
         self.worker.moveToThread(self.thread)
         self.thread.start()
 
@@ -127,7 +143,7 @@ class AppWindow(QWidget):
         self.button.clicked.connect(self.update_checkerboard)
 
         self.text_label = QLabel()
-        self.text_label.setText('Label')
+        self.text_label.setText('Make a move')
         self.text_label.setAlignment(Qt.AlignCenter)
 
         self.image_label = QLabel()
@@ -158,6 +174,10 @@ class AppWindow(QWidget):
     @pyqtSlot()
     def update_checkerboard(self):
         self.should_emit_signal.emit()
+
+    @pyqtSlot(str)
+    def update_label(self, text):
+        self.text_label.setText(text)
 
     @pyqtSlot(np.ndarray)
     def draw_checkerboard(self, board_matrix=None):
