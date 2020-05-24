@@ -4,7 +4,7 @@ import urllib.request
 import cv2
 import numpy as np
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtGui import QIcon, QImage, QPixmap
+from PyQt5.QtGui import QIcon, QImage, QPixmap, QFont
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
@@ -70,15 +70,19 @@ class Worker(QObject):
                     self.after_matrix = third_matrix
                 self.emit_new_board(self.after_matrix)
 
+                text = ''
                 if self.after_matrix is not None and self.i > 0:
                     print(check_move(self.before_matrix, self.after_matrix, self.player_colour))
                     if check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.CORRECT:
-                        self.emit_new_label('Correct move')
+                        text = 'Correct move'
                     elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.INCORRECT:
-                        self.emit_new_label('Incorrect move')
+                        text = 'Incorrect move'
                     elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.UNDEFINED:
-                        self.emit_new_label('Undefined move')
+                        text = 'Undefined move'
+                    else:
+                        text = 'No change detected'
                     self.player_colour = opposite(self.player_colour)
+                    self.emit_new_label(text + ' - ' + str(self.player_colour)[11:].lower() + ' turn')
                     print(self.player_colour)
 
                 self.i = self.i + 1
@@ -101,15 +105,15 @@ class Worker(QObject):
         if move == MoveStatus.CORRECT:
             self.emit_new_board(self.after_matrix)
             self.player_colour = opposite(self.player_colour)
-            self.emit_new_label('Correct move')
+            self.emit_new_label('Correct move - ' + str(self.player_colour)[11:].lower() + ' turn')
         elif move == MoveStatus.INCORRECT:
-            # TODO some message
             self.emit_new_label('Incorrect move')
             self.after_matrix = self.before_matrix
         elif move == MoveStatus.UNDEFINED:
-            # TODO some message
             self.emit_new_label('Undefined move')
             self.after_matrix = self.before_matrix
+        elif move == MoveStatus.NO_CHANGE:
+            self.emit_new_label('No change detected')
 
 
 class AppWindow(QWidget):
@@ -144,6 +148,7 @@ class AppWindow(QWidget):
 
         self.text_label = QLabel()
         self.text_label.setText('Make a move')
+        self.text_label.setFont(QFont('Arial', 14))
         self.text_label.setAlignment(Qt.AlignCenter)
 
         self.image_label = QLabel()
