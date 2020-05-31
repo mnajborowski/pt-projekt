@@ -30,65 +30,65 @@ class Worker(QObject):
         self.i = 0
 
     # With camera
-    # @pyqtSlot()
-    # def capture_video(self):
-    #     url = 'http://192.168.1.58:8080/shot.jpg'
-    #     while True:
-    #         img_response = urllib.request.urlopen(url)
-    #         img_np = np.array(bytearray(img_response.read()), dtype=np.uint8)
-    #         image = cv2.imdecode(img_np, -1)
-    #         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    #         h, w, ch = rgb_image.shape
-    #         bytes_per_line = ch * w
-    #         q_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
-    #         q_image = q_image.scaled(640, 480, Qt.KeepAspectRatio)
-    #         self.new_image_ready_signal.emit(q_image)
-    #         if self.should_emit:
-    #             print('Click!')
-    #             self.before_matrix = self.after_matrix
-    #             board = detect_board(image)
-    #             if board is not None:
-    #                 self.after_matrix = create_board_matrix(board)
-    #                 if self.before_matrix is not None:
-    #                     self.make_move()
-    #                 else:
-    #                     self.emit_new_board(self.after_matrix)
-    #                     self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
-    #             self.should_emit = False
-
-    # Without camera
     @pyqtSlot()
     def capture_video(self):
+        url = 'http://192.168.1.58:8080/shot.jpg'
         while True:
-            QThread.usleep(16660)
+            img_response = urllib.request.urlopen(url)
+            img_np = np.array(bytearray(img_response.read()), dtype=np.uint8)
+            image = cv2.imdecode(img_np, -1)
+            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            h, w, ch = rgb_image.shape
+            bytes_per_line = ch * w
+            q_image = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            q_image = q_image.scaled(640, 480, Qt.KeepAspectRatio)
+            self.new_image_ready_signal.emit(q_image)
             if self.should_emit:
+                print('Click!')
                 self.before_matrix = self.after_matrix
-                if self.i == 0:
-                    self.after_matrix = first_matrix
-                if self.i == 1:
-                    self.after_matrix = second_matrix
-                if self.i == 2:
-                    self.after_matrix = third_matrix
-                self.emit_new_board(self.after_matrix)
-                self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
-
-                text = ''
-                if self.after_matrix is not None and self.i > 0:
-                    print(check_move(self.before_matrix, self.after_matrix, self.player_colour))
-                    if check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.CORRECT:
-                        text = 'Correct move'
-                    elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.INCORRECT:
-                        text = 'Incorrect move'
-                    elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.UNDEFINED:
-                        text = 'Undefined move'
+                board = detect_board(image)
+                if board is not None:
+                    self.after_matrix = create_board_matrix(board)
+                    if self.before_matrix is not None:
+                        self.make_move()
                     else:
-                        text = 'No change detected'
-                    self.player_colour = opposite(self.player_colour)
-                    self.emit_new_label(text + ' - ' + str(self.player_colour)[11:].lower() + ' turn')
-                    print(self.player_colour)
-
-                self.i = self.i + 1
+                        self.emit_new_board(self.after_matrix)
+                        self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
                 self.should_emit = False
+
+    # Without camera
+    # @pyqtSlot()
+    # def capture_video(self):
+    #     while True:
+    #         QThread.usleep(16660)
+    #         if self.should_emit:
+    #             self.before_matrix = self.after_matrix
+    #             if self.i == 0:
+    #                 self.after_matrix = first_matrix
+    #             if self.i == 1:
+    #                 self.after_matrix = second_matrix
+    #             if self.i == 2:
+    #                 self.after_matrix = third_matrix
+    #             self.emit_new_board(self.after_matrix)
+    #             self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
+    #
+    #             text = ''
+    #             if self.after_matrix is not None and self.i > 0:
+    #                 print(check_move(self.before_matrix, self.after_matrix, self.player_colour))
+    #                 if check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.CORRECT:
+    #                     text = 'Correct move'
+    #                 elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.INCORRECT:
+    #                     text = 'Incorrect move'
+    #                 elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.UNDEFINED:
+    #                     text = 'Undefined move'
+    #                 else:
+    #                     text = 'No change detected'
+    #                 self.player_colour = opposite(self.player_colour)
+    #                 self.emit_new_label(text + ' - ' + str(self.player_colour)[11:].lower() + ' turn')
+    #                 print(self.player_colour)
+    #
+    #             self.i = self.i + 1
+    #             self.should_emit = False
 
     @pyqtSlot(np.ndarray)
     def emit_new_board(self, board):
