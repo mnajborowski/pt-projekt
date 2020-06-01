@@ -50,7 +50,7 @@ class Worker(QObject):
                 if board is not None:
                     self.after_matrix = create_board_matrix(board)
                     if self.before_matrix is not None:
-                        self.make_move()
+                        self.__make_move()
                     else:
                         self.emit_new_board(self.after_matrix)
                         self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
@@ -113,13 +113,13 @@ class Worker(QObject):
             self.player_colour = opposite(self.player_colour)
             self.emit_new_label('Correct move - ' + str(self.player_colour)[11:].lower() + ' turn')
         elif move == MoveStatus.INCORRECT:
-            self.emit_new_label('Incorrect move')
+            self.emit_new_label('Incorrect move - ' + str(self.player_colour)[11:].lower() + ' turn')
             self.after_matrix = self.before_matrix
         elif move == MoveStatus.UNDEFINED:
-            self.emit_new_label('Undefined move')
+            self.emit_new_label('Undefined move - ' + str(self.player_colour)[11:].lower() + ' turn')
             self.after_matrix = self.before_matrix
         elif move == MoveStatus.NO_CHANGE:
-            self.emit_new_label('No change detected')
+            self.emit_new_label('No change detected - ' + str(self.player_colour)[11:].lower() + ' turn')
 
     def count_pawns_and_display(self, board):
         white_pawns = 0
@@ -165,7 +165,7 @@ class AppWindow(QWidget):
         self.button.clicked.connect(self.update_checkerboard)
 
         self.text_label = QLabel()
-        self.text_label.setText('Make a move')
+        self.text_label.setText('Make a move - white turn')
         self.text_label.setFont(QFont('Arial', 14))
         self.text_label.setAlignment(Qt.AlignCenter)
 
