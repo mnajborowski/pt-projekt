@@ -47,7 +47,7 @@ def cut_the_board(img, contours):
         miny = min(flat_list_y)
         maxy = max(flat_list_y)
         return img[miny:maxy, minx:maxx]
-    print("Cannot detect the board! (TUBUDUBU)")
+    print("Cannot detect the board!")
 
 
 def get_square(img, row, col):
