@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QIcon, QImage, QPixmap, QFont
@@ -8,6 +10,7 @@ from checkers.gui.worker import Worker
 
 
 class AppWindow(QWidget):
+    assets_path = f'{Path(__file__).parent}/assets'
     should_emit_signal = pyqtSignal()
 
     def __init__(self):
@@ -33,7 +36,7 @@ class AppWindow(QWidget):
         self.thread.start()
 
     def __init_ui(self):
-        self.setWindowIcon(QIcon('gui/assets/app_icon.png'))
+        self.setWindowIcon(QIcon(f'{self.assets_path}/app_icon.png'))
 
         self.button = QPushButton('Update the board')
         self.button.clicked.connect(self.update_checkerboard)
@@ -92,27 +95,27 @@ class AppWindow(QWidget):
             for x in range(8):
                 for y in range(8):
                     if (x * 7 + y) % 2:
-                        square = QSvgWidget('gui/assets/dark_square.svg')
+                        square = QSvgWidget(f'{self.assets_path}/dark_square.svg')
                     else:
-                        square = QSvgWidget('gui/assets/light_square.svg')
+                        square = QSvgWidget(f'{self.assets_path}/light_square.svg')
                     self.grid_layout.addWidget(square, x, y)
         else:
             for x in range(8):
                 for y in range(8):
                     if (x * 7 + y) % 2:
                         if board_matrix[x][y] == 1:
-                            square = QSvgWidget('gui/assets/dark_square_black_checker.svg')
+                            square = QSvgWidget(f'{self.assets_path}/dark_square_black_checker.svg')
                         elif board_matrix[x][y] == 2:
-                            square = QSvgWidget('gui/assets/dark_square_white_checker.svg')
+                            square = QSvgWidget(f'{self.assets_path}/dark_square_white_checker.svg')
                         else:
-                            square = QSvgWidget('gui/assets/dark_square.svg')
+                            square = QSvgWidget(f'{self.assets_path}/dark_square.svg')
                     else:
                         if board_matrix[x][y] == 1:
-                            square = QSvgWidget('gui/assets/light_square_black_checker.svg')
+                            square = QSvgWidget(f'{self.assets_path}/light_square_black_checker.svg')
                         elif board_matrix[x][y] == 2:
-                            square = QSvgWidget('gui/assets/light_square_white_checker.svg')
+                            square = QSvgWidget(f'{self.assets_path}/light_square_white_checker.svg')
                         else:
-                            square = QSvgWidget('gui/assets/light_square.svg')
+                            square = QSvgWidget(f'{self.assets_path}/light_square.svg')
                     self.grid_layout.addWidget(square, x, y)
 
     def __clear_grid_layout(self):
