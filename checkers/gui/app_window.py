@@ -47,7 +47,7 @@ class AppWindow(QWidget):
         self.text_label.setAlignment(Qt.AlignCenter)
 
         self.pawns_label = QLabel()
-        self.pawns_label.setText('White pawns number: X \t Black pawns number: Y')
+        self.pawns_label.setText('White pawns count: X \t Black pawns count: Y')
         self.pawns_label.setFont(QFont('Arial', 11, italic=True))
         self.pawns_label.setAlignment(Qt.AlignCenter)
 
@@ -75,6 +75,7 @@ class AppWindow(QWidget):
             self.setLayout(self.v_box_layout)
 
         self.draw_checkerboard()
+        self.setFixedSize(self.layout().sizeHint())
 
     @pyqtSlot(QImage)
     def set_camera_image(self, img):
