@@ -6,3 +6,4 @@ class MoveStatus(Enum):
     INCORRECT = 2
     NO_CHANGE = 3
     UNDEFINED = 4
+    GAME_OVER = 5

@@ -77,6 +77,8 @@ class Worker(QObject):
         elif move == MoveStatus.UNDEFINED:
             self.emit_new_label('Undefined move - ' + str(self.player_colour)[11:].lower() + ' turn')
             self.after_matrix = self.before_matrix
+        elif move == MoveStatus.GAME_OVER:
+            self.emit_new_label('Game over')
         elif move == MoveStatus.NO_CHANGE:
             self.emit_new_label('No change detected - ' + str(self.player_colour)[11:].lower() + ' turn')
 

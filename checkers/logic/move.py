@@ -26,20 +26,24 @@ def check_move(before_matrix, after_matrix, player_colour):
         return MoveStatus.INCORRECT
 
     if player_colour == PawnColour.WHITE:
-        correct_next_positions = get_correct_next_positions(
+        correct_next_positions, had_to_attack = get_correct_next_positions(
             before_matrix,
             old_white_positions[0],
             PawnColour.BLACK
         )
         if moved_correctly(new_white_positions, correct_next_positions):
+            if game_over(after_matrix, opposite(player_colour)) and had_to_attack:
+                return MoveStatus.GAME_OVER
             return MoveStatus.CORRECT
     else:
-        correct_next_positions = get_correct_next_positions(
+        correct_next_positions, had_to_attack = get_correct_next_positions(
             before_matrix,
             old_black_positions[0],
             PawnColour.WHITE
         )
         if moved_correctly(new_black_positions, correct_next_positions):
+            if game_over(after_matrix, opposite(player_colour)) and had_to_attack:
+                return MoveStatus.GAME_OVER
             return MoveStatus.CORRECT
 
     return MoveStatus.INCORRECT
@@ -69,7 +73,7 @@ def get_correct_next_positions(before_matrix, old_position, opponent_color):
             elif is_empty(before_matrix, cp) and not has_to_attack:
                 if is_forward(old_position, cp, opposite(opponent_color)):
                     correct_next_positions.append([cp[0], cp[1]])
-    return correct_next_positions
+    return correct_next_positions, has_to_attack
 
 
 def is_on_board(position):
@@ -98,29 +102,36 @@ def moved_correctly(new_positions, correct_positions):
     return False
 
 
+def game_over(matrix, opponent_colour):
+    for pawn in np.nditer(matrix):
+        if pawn == opponent_colour.value:
+            return False
+    return True
+
+
 if __name__ == '__main__':
     before_test_matrix = np.array(
-        [[0, 1, 0, 1, 0, 1, 0, 1],
-         [1, 0, 1, 0, 1, 0, 1, 0],
-         [0, 1, 0, 0, 0, 1, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0],
+        [[0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0],
-         [2, 0, 2, 0, 0, 0, 0, 0],
-         [0, 2, 0, 2, 0, 2, 0, 2],
-         [2, 0, 2, 0, 2, 0, 2, 0]],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 1, 0, 0, 0, 0],
+         [0, 0, 0, 0, 2, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0]],
         dtype=int
     )
 
     after_test_matrix = np.array(
-        [[0, 1, 0, 1, 0, 1, 0, 1],
-         [1, 0, 1, 0, 1, 0, 1, 0],
-         [0, 1, 0, 0, 0, 1, 0, 0],
+        [[0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 2, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0],
-         [2, 0, 2, 0, 0, 0, 1, 0],
-         [0, 2, 0, 2, 0, 2, 0, 2],
-         [2, 0, 2, 0, 2, 0, 2, 0]],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0]],
         dtype=int
     )
 
-    print(check_move(before_test_matrix, after_test_matrix, PawnColour.BLACK))
+    print(check_move(before_test_matrix, after_test_matrix, PawnColour.WHITE))

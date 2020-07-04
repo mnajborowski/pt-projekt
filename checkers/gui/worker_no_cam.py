@@ -72,10 +72,13 @@ class WorkerNoCam(Worker):
                         text = 'Incorrect move'
                     elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.UNDEFINED:
                         text = 'Undefined move'
+                    elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.GAME_OVER:
+                        text = 'Game over'
                     else:
                         text = 'No change detected'
-                    self.emit_new_label(text + ' - ' + str(self.player_colour)[11:].lower() + ' turn')
-                    print(self.player_colour)
+                    if text != 'Game over':
+                        self.emit_new_label(text + ' - ' + str(self.player_colour)[11:].lower() + ' turn')
+                        print(self.player_colour)
 
                 self.i = self.i + 1
                 self.should_emit = False
