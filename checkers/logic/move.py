@@ -1,7 +1,7 @@
 import numpy as np
 
-from checkers.image.pawncolours import PawnColour
-from checkers.image.pawncolours import opposite
+from checkers.image.pawn_colour import PawnColour
+from checkers.image.pawn_colour import opposite
 from checkers.logic.move_status import MoveStatus
 
 
@@ -13,13 +13,16 @@ def check_move(before_matrix, after_matrix, player_colour):
     if np.array_equal(before_matrix, after_matrix):
         return MoveStatus.NO_CHANGE
     # pawn's missing
-    if (player_colour == PawnColour.WHITE and new_white_positions.size == 0) or (player_colour == PawnColour.BLACK and new_black_positions.size == 0):
+    if (player_colour == PawnColour.WHITE and new_white_positions.size == 0) or (
+            player_colour == PawnColour.BLACK and new_black_positions.size == 0):
         return MoveStatus.UNDEFINED
     # opponent's pawns were moved during players turn
-    if (player_colour == PawnColour.WHITE and new_black_positions.size != 0) or (player_colour == PawnColour.BLACK and new_white_positions.size != 0):
+    if (player_colour == PawnColour.WHITE and new_black_positions.size != 0) or (
+            player_colour == PawnColour.BLACK and new_white_positions.size != 0):
         return MoveStatus.INCORRECT
     # more than 1 player's pawn was moved
-    if (player_colour == PawnColour.WHITE and new_black_positions.size > 1) or (player_colour == PawnColour.BLACK and new_white_positions.size > 1):
+    if (player_colour == PawnColour.WHITE and new_black_positions.size > 1) or (
+            player_colour == PawnColour.BLACK and new_white_positions.size > 1):
         return MoveStatus.INCORRECT
 
     if player_colour == PawnColour.WHITE:
