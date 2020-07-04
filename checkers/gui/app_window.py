@@ -52,6 +52,8 @@ class AppWindow(QWidget):
         self.pawns_label.setAlignment(Qt.AlignCenter)
 
         self.image_label = QLabel()
+        self.image_label.setFixedWidth(640)
+        self.image_label.setFixedHeight(480)
 
         self.grid_layout = QGridLayout()
         for i in range(8):
