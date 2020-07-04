@@ -65,10 +65,14 @@ class AppWindow(QWidget):
         self.v_box_layout.addWidget(self.pawns_label)
         self.v_box_layout.addLayout(self.grid_layout)
 
-        self.h_box_layout = QHBoxLayout()
-        self.h_box_layout.addWidget(self.image_label)
-        self.h_box_layout.addLayout(self.v_box_layout)
-        self.setLayout(self.h_box_layout)
+        # Show camera view only when using camera
+        if type(self.worker) == Worker:
+            self.h_box_layout = QHBoxLayout()
+            self.h_box_layout.addWidget(self.image_label)
+            self.h_box_layout.addLayout(self.v_box_layout)
+            self.setLayout(self.h_box_layout)
+        else:
+            self.setLayout(self.v_box_layout)
 
         self.draw_checkerboard()
 
