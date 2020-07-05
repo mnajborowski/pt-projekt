@@ -31,6 +31,7 @@ class AppWindow(QWidget):
         self.worker.new_board_ready_signal.connect(self.draw_checkerboard)
         self.worker.new_label_ready_signal.connect(self.update_label)
         self.worker.new_pawns_label_ready_signal.connect(self.update_pawns_label)
+        self.worker.new_button_label_ready_signal.connect(self.update_button_label)
         self.worker.moveToThread(self.thread)
 
         self.thread.start()
@@ -94,6 +95,10 @@ class AppWindow(QWidget):
     @pyqtSlot(str)
     def update_pawns_label(self, text):
         self.pawns_label.setText(text)
+
+    @pyqtSlot(str)
+    def update_button_label(self, text):
+        self.button.setText(text)
 
     @pyqtSlot(np.ndarray)
     def draw_checkerboard(self, board_matrix=None):
