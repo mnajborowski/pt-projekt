@@ -49,6 +49,7 @@ class Worker(QObject):
                     else:
                         self.emit_new_board(self.after_matrix)
                         self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
+                        self.emit_new_label('Make a move - white turn')
                         self.emit_new_button_label('Update the board')
                 self.should_emit = False
 

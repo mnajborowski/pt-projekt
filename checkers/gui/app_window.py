@@ -7,6 +7,7 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QWidget, QGridLayout, QVBoxLayout, QPushButton, QHBoxLayout, QLabel
 
 from checkers.gui.worker import Worker
+# from checkers.gui.worker_no_cam import WorkerNoCam
 
 
 class AppWindow(QWidget):
