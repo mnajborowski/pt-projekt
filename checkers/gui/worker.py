@@ -16,6 +16,7 @@ class Worker(QObject):
     new_image_ready_signal = pyqtSignal(QImage)
     new_label_ready_signal = pyqtSignal(str)
     new_pawns_label_ready_signal = pyqtSignal(str)
+    new_button_label_ready_signal = pyqtSignal(str)
 
     def __init__(self, parent=None):
         QObject.__init__(self, parent=parent)
@@ -48,6 +49,8 @@ class Worker(QObject):
                     else:
                         self.emit_new_board(self.after_matrix)
                         self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
+                        self.emit_new_label('Make a move - white turn')
+                        self.emit_new_button_label('Update the board')
                 self.should_emit = False
 
     @pyqtSlot(np.ndarray)
@@ -65,18 +68,30 @@ class Worker(QObject):
     def emit_new_pawns_label(self, text):
         self.new_pawns_label_ready_signal.emit(text)
 
+    @pyqtSlot(str)
+    def emit_new_button_label(self, text):
+        self.new_button_label_ready_signal.emit(text)
+
     def __make_move(self):
         move = check_move(self.before_matrix, self.after_matrix, self.player_colour)
         if move == MoveStatus.CORRECT:
             self.emit_new_board(self.after_matrix)
             self.player_colour = opposite(self.player_colour)
             self.emit_new_label('Correct move - ' + str(self.player_colour)[11:].lower() + ' turn')
+            self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
         elif move == MoveStatus.INCORRECT:
             self.emit_new_label('Incorrect move - ' + str(self.player_colour)[11:].lower() + ' turn')
             self.after_matrix = self.before_matrix
         elif move == MoveStatus.UNDEFINED:
             self.emit_new_label('Undefined move - ' + str(self.player_colour)[11:].lower() + ' turn')
             self.after_matrix = self.before_matrix
+        elif move == MoveStatus.GAME_OVER:
+            self.emit_new_board(self.after_matrix)
+            self.player_colour = PawnColour.WHITE
+            self.emit_new_label('Game over - ' + str(self.player_colour)[11:].lower() + ' wins')
+            self.emit_new_button_label('Start over')
+            self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
+            self.after_matrix = None
         elif move == MoveStatus.NO_CHANGE:
             self.emit_new_label('No change detected - ' + str(self.player_colour)[11:].lower() + ' turn')
 

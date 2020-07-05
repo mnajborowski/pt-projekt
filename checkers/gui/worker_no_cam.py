@@ -8,36 +8,36 @@ from checkers.logic.move_status import MoveStatus
 
 first_matrix = np.array(
     [[0, 1, 0, 1, 0, 1, 0, 1],
-     [1, 0, 0, 0, 1, 0, 1, 0],
-     [0, 0, 0, 0, 0, 0, 0, 2],
-     [0, 0, 2, 0, 1, 0, 0, 0],
-     [0, 2, 0, 2, 0, 0, 0, 0],
-     [0, 0, 0, 0, 2, 0, 0, 0],
-     [0, 2, 0, 2, 0, 0, 0, 2],
+     [1, 0, 1, 0, 1, 0, 1, 0],
+     [0, 0, 0, 0, 0, 1, 0, 0],
+     [0, 0, 1, 0, 0, 0, 2, 0],
+     [0, 0, 0, 2, 0, 0, 0, 0],
+     [2, 0, 0, 0, 0, 0, 2, 0],
+     [0, 2, 0, 2, 0, 2, 0, 2],
      [2, 0, 2, 0, 2, 0, 2, 0]],
     dtype=int
 )
 
 second_matrix = np.array(
     [[0, 1, 0, 1, 0, 1, 0, 1],
-     [1, 0, 0, 0, 1, 0, 1, 0],
-     [0, 0, 0, 0, 0, 2, 0, 2],
-     [0, 0, 2, 0, 0, 0, 0, 0],
-     [0, 2, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 2, 0, 0, 0],
-     [0, 2, 0, 2, 0, 0, 0, 2],
+     [1, 0, 1, 0, 1, 0, 1, 0],
+     [0, 2, 0, 0, 0, 1, 0, 0],
+     [0, 0, 0, 0, 0, 0, 2, 0],
+     [0, 0, 0, 0, 0, 0, 0, 0],
+     [2, 0, 0, 0, 0, 0, 2, 0],
+     [0, 2, 0, 2, 0, 2, 0, 2],
      [2, 0, 2, 0, 2, 0, 2, 0]],
     dtype=int
 )
 
 third_matrix = np.array(
     [[0, 1, 0, 1, 0, 1, 0, 1],
-     [1, 0, 0, 0, 0, 0, 1, 0],
-     [0, 0, 0, 0, 0, 0, 0, 2],
-     [0, 0, 2, 0, 0, 0, 1, 0],
-     [0, 2, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 2, 0, 0, 0],
-     [0, 2, 0, 2, 0, 0, 0, 2],
+     [0, 0, 1, 0, 1, 0, 1, 0],
+     [0, 0, 0, 0, 0, 1, 0, 0],
+     [0, 0, 1, 0, 0, 0, 2, 0],
+     [0, 0, 0, 0, 0, 0, 0, 0],
+     [2, 0, 0, 0, 0, 0, 2, 0],
+     [0, 2, 0, 2, 0, 2, 0, 2],
      [2, 0, 2, 0, 2, 0, 2, 0]],
     dtype=int
 )
@@ -72,10 +72,14 @@ class WorkerNoCam(Worker):
                         text = 'Incorrect move'
                     elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.UNDEFINED:
                         text = 'Undefined move'
+                    elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.GAME_OVER:
+                        text = 'Game over'
+                        self.emit_new_label('Game over - ' + str(self.player_colour)[11:].lower() + ' wins')
                     else:
                         text = 'No change detected'
-                    self.emit_new_label(text + ' - ' + str(self.player_colour)[11:].lower() + ' turn')
-                    print(self.player_colour)
+                    if text != 'Game over':
+                        self.emit_new_label(text + ' - ' + str(self.player_colour)[11:].lower() + ' turn')
+                        print(self.player_colour)
 
                 self.i = self.i + 1
                 self.should_emit = False
