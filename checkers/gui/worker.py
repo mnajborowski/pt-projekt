@@ -78,6 +78,7 @@ class Worker(QObject):
             self.emit_new_board(self.after_matrix)
             self.player_colour = opposite(self.player_colour)
             self.emit_new_label('Correct move - ' + str(self.player_colour)[11:].lower() + ' turn')
+            self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
         elif move == MoveStatus.INCORRECT:
             self.emit_new_label('Incorrect move - ' + str(self.player_colour)[11:].lower() + ' turn')
             self.after_matrix = self.before_matrix
@@ -86,10 +87,11 @@ class Worker(QObject):
             self.after_matrix = self.before_matrix
         elif move == MoveStatus.GAME_OVER:
             self.emit_new_board(self.after_matrix)
-            self.after_matrix = None
             self.player_colour = PawnColour.WHITE
             self.emit_new_label('Game over - ' + str(self.player_colour)[11:].lower() + ' wins')
             self.emit_new_button_label('Start over')
+            self.emit_new_pawns_label(self.count_pawns_and_display(self.after_matrix))
+            self.after_matrix = None
         elif move == MoveStatus.NO_CHANGE:
             self.emit_new_label('No change detected - ' + str(self.player_colour)[11:].lower() + ' turn')
 
