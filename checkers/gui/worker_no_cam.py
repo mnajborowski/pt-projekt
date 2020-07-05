@@ -74,6 +74,7 @@ class WorkerNoCam(Worker):
                         text = 'Undefined move'
                     elif check_move(self.before_matrix, self.after_matrix, self.player_colour) == MoveStatus.GAME_OVER:
                         text = 'Game over'
+                        self.emit_new_label('Game over - ' + str(self.player_colour)[11:].lower() + ' wins')
                     else:
                         text = 'No change detected'
                     if text != 'Game over':
