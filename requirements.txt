@@ -1,6 +1,6 @@
-opencv-python>=4.2.0.34
-numpy>=1.18.2
-PyQt5>=5.14.2
-PyQt5-stubs>=5.14.2.0
-PyQt5-sip>=12.7.2
-scikit-image~=0.14.2
+opencv-python~=4.2.0.34
+numpy~=1.18.2
+PyQt5~=5.14.2
+PyQt5-stubs~=5.14.2.0
+PyQt5-sip~=12.7.2
+scikit-image~=0.16.2

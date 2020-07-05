@@ -3,7 +3,7 @@ import numpy as np
 from skimage.exposure import rescale_intensity
 from skimage.filters import threshold_yen
 
-from checkers.image.pawn import search_for_pawn, detect_pawn_colour
+from checkers.image.pawn import pawn_exists, detect_pawn_colour
 
 
 def detect_board(img):
@@ -14,8 +14,7 @@ def detect_board(img):
     kernel = np.ones((7, 7), np.uint8)
     erosion = cv2.erode(thresh, kernel, iterations=1)
     contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    return cut_the_board(img_resized, contours)
+    return crop_board(img_resized, contours)
 
 
 def create_board_matrix(img):
@@ -27,13 +26,13 @@ def create_board_matrix(img):
         for j in range(8):
             square = get_square(img, i, j)
             bright_square = get_square(without_noise, i, j)
-            if search_for_pawn(square, bright_square):
+            if pawn_exists(square, bright_square):
                 colour = detect_pawn_colour(square)
                 board_matrix[i][j] = colour.value
     return board_matrix
 
 
-def cut_the_board(img, contours):
+def crop_board(img, contours):
     filtered_contours = [contour for contour in contours if 1700 < cv2.contourArea(contour) < 3500]
     flat_list_x = []
     flat_list_y = []
@@ -47,7 +46,7 @@ def cut_the_board(img, contours):
         miny = min(flat_list_y)
         maxy = max(flat_list_y)
         return img[miny:maxy, minx:maxx]
-    print("Cannot detect the board! (TUBUDUBU)")
+    print("Cannot detect the board!")
 
 
 def get_square(img, row, col):
@@ -55,5 +54,4 @@ def get_square(img, row, col):
     square = width // 8
     x1, y1 = row * square, col * square
     x2, y2 = x1 + square, y1 + square
-
     return img[x1:x2, y1:y2]
